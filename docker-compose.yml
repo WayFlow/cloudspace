@@ -9,7 +9,7 @@ services:
       net:
         ipv4_address: 172.16.1.10
     ports:
-      - "8000:8000"
+      - "8800:8000"
     depends_on:
       - redis
       - postgres
@@ -39,10 +39,25 @@ services:
       - POSTGRES_DB=cloudspace_db
     volumes:
       - cldspcPg:/var/lib/postgresql/data
+  
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: cloudspace_pgadmin
+    networks:
+      net:
+        ipv4_address: 172.16.1.13
+    ports:
+      - "5500:80"  # PgAdmin UI
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=suyashmadhesia@gmail.com
+      - PGADMIN_DEFAULT_PASSWORD=Wonderful@123
+    volumes:
+      - cldspcPgadmin:/var/lib/pgadmin
 
 volumes:
   cldspcRd:
   cldspcPg:
+  cldspcPgadmin:
 
 networks:
   net:
