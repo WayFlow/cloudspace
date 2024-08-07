@@ -49,8 +49,22 @@ WSGI_APPLICATION = 'cloudspace.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'cloudspace_db',
+        'PASSWORD': '1234',
+        'USER': 'cloudspace_user',
+        'HOST': '172.16.1.12',
+        'PORT' : '5432'
+    }
+}
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://172.16.1.11:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
     }
 }
 
