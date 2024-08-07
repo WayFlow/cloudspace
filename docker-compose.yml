@@ -1,0 +1,46 @@
+version: '1.0'
+services:
+  app:
+    build: .
+    container_name: cloudspace_app
+    volumes:
+      - .:/app
+    networks:
+      - cloudspace
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - postgres
+
+  redis:
+    image: redis:latest
+    container_name: cloudspace_cache
+    networks:
+      - cloudspace
+    ports:
+      - "6500:6379"
+    volumes:
+      - cldspcRd:/data
+
+  postgres:
+    image: postgres:latest
+    container_name: cloudspace_db
+    networks:
+      - cloudspace
+    ports:
+      - "6501:5432"
+    environment:
+      - POSTGRES_USER=cloudspace_user
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=cloudspace_db
+    volumes:
+      - cldspcPg:/var/lib/postgresql/data
+
+volumes:
+  cldspcRd:
+  cldspcPg:
+
+networks:
+  cloudspace:
+    driver: bridge
