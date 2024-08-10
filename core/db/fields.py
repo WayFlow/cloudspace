@@ -46,7 +46,9 @@ class Field:
     def _check_db_index(self):
         if self._db_index not in (None, True, False):
             return [
-                exceptions.ValidationError(f"{self.__class__.__name__}.{self._name} 'db_index' must be None, True, or False")
+                exceptions.ValidationError(
+                    f"{self.__class__.__name__}.{self._name} 'db_index' must be None, True, or False"
+                )
             ]
         return []
 
@@ -55,14 +57,18 @@ class Field:
         for _, validator in enumerate(self._validators):
             if not callable(validator):
                 errors.append(
-                    exceptions.ValidationError(f"{self.__class__.__name__}.{self._name} all validators must be callable.")
+                    exceptions.ValidationError(
+                        f"{self.__class__.__name__}.{self._name} all validators must be callable."
+                    )
                 )
         return errors
 
     def _check_null_allowed_for_primary_key(self):
         if not isinstance(self._primary_key, bool):
             return [
-                exceptions.ValidationError(f"{self.__class__.__name__}.{self._name} primary_key value Either True or False")
+                exceptions.ValidationError(
+                    f"{self.__class__.__name__}.{self._name} primary_key value Either True or False"
+                )
             ]
         if self._null and self._primary_key:
             return [
@@ -80,9 +86,9 @@ class Field:
         return self._default
 
     def run_validator(self, value):
-        '''
+        """
         Only use it for saving a value in this field.
-        '''
+        """
         if value in self.empty_values:
             return
         errors = []
@@ -144,33 +150,40 @@ class BooleanField(Field):
         if value in ("f", "False", "0"):
             return False
         raise exceptions.ValidationError(
-            f"{self.__class__.__name__}.{self._name} Invalid boolean field value", code="invalid", params={"value": value}
+            f"{self.__class__.__name__}.{self._name} Invalid boolean field value",
+            code="invalid",
+            params={"value": value},
         )
-    
+
     def _check(self):
-        errors =  super()._check()
+        errors = super()._check()
         if self._primary_key:
-            errors.append(exceptions.ValidationError(
-                f"{self.__class__.__name__}.{self._name} boolean field cannot marked as primary key",
-            ))
-        if not isinstance(self._get_default, bool):
-            errors.append(exceptions.ValidationError(
-                f"{self.__class__.__name__}.{self._name} invalid default value: default value should either True or False",
-            ))
+            errors.append(
+                exceptions.ValidationError(
+                    f"{self.__class__.__name__}.{self._name} boolean field cannot marked as primary key",
+                )
+            )
+        if not self._get_default is NOT_PROVIDED and not isinstance(
+            self._get_default, bool
+        ):
+            errors.append(
+                exceptions.ValidationError(
+                    f"{self.__class__.__name__}.{self._name} invalid default value: default value should either True or False",
+                )
+            )
         return errors
 
 
-class StringField(Field): 
+class StringField(Field):
 
     def to_python(self, value):
         if not isinstance(value, str):
             raise exceptions.ValidationError(
                 f"{self.__class__.__name__}.{self._name} Invalid string field value",
                 code="invalid",
-                params={"value": value}
+                params={"value": value},
             )
         return value
-
 
     def _check(self):
         errors = super()._check()
@@ -184,7 +197,9 @@ class StringField(Field):
                     f"{self.__class__.__name__}.{self._name} max_length must be int and must not be -negative or zero"
                 )
             )
-        if not isinstance(self._get_default, str):
+        if not self._get_default is NOT_PROVIDED and not isinstance(
+            self._get_default, str
+        ):
             errors.append(
                 exceptions.ValidationError(
                     f"{self.__class__.__name__}.{self._name} default value of the StringField must be a string"
@@ -199,43 +214,45 @@ class TextField(Field):
             raise exceptions.ValidationError(
                 f"{self.__class__.__name__}.{self._name} Invalid Text field value",
                 code="invalid",
-                params={"value": value}
+                params={"value": value},
             )
         return value
 
-
     def _check(self):
         errors = super()._check()
-        if not isinstance(self._get_default, str):
+        if not self._get_default is NOT_PROVIDED and not isinstance(
+            self._get_default, str
+        ):
             errors.append(
                 exceptions.ValidationError(
                     f"{self.__class__.__name__}.{self._name} default value of the TextField must be a string"
                 )
             )
         return errors
-    
+
 
 class EmailField(Field): ...
 
 
 class UrlField(Field): ...
 
-class IntegerField(Field):
 
+class IntegerField(Field):
 
     def to_python(self, value):
         if not isinstance(value, int):
             raise exceptions.ValidationError(
                 f"{self.__class__.__name__}.{self._name} Invalid string field value",
                 code="invalid",
-                params={"value": value}
+                params={"value": value},
             )
         return value
 
-
     def _check(self):
         errors = super()._check()
-        if not isinstance(self._get_default, str):
+        if not self._get_default is NOT_PROVIDED and not isinstance(
+            self._get_default, int
+        ):
             errors.append(
                 exceptions.ValidationError(
                     f"{self.__class__.__name__}.{self._name} default value of the StringField must be a string"
@@ -251,5 +268,3 @@ class DateField(Field): ...
 
 
 class DateTimeField(Field): ...
-
-

@@ -44,7 +44,6 @@ class ValidationError(Exception):
             self.params = params
             self.error_list = [self]
 
-
     def __iter__(self):
         if hasattr(self, "error_dict"):
             for field, errors in self.error_dict.items():
@@ -55,7 +54,6 @@ class ValidationError(Exception):
                 if error.params:
                     message %= error.params
                 yield str(message)
-
 
     @property
     def message_dict(self):
