@@ -1,5 +1,5 @@
-import utils.validators as validators
-import utils.exceptions as exceptions
+from core.utils import validators as validators
+from core.utils import exceptions as exceptions
 
 
 class NOT_PROVIDED:
@@ -36,7 +36,7 @@ class Field:
         self._validators = ()
         self._error_messages = error_messages
 
-    def check(self):
+    def _check(self):
         return [
             *self._check_null_allowed_for_primary_key(),
             *self._check_validators(),
@@ -46,7 +46,7 @@ class Field:
     def _check_db_index(self):
         if self._db_index not in (None, True, False):
             return [
-                exceptions.ValidationError(f"on {self.__class__.__name__}.{self.name} 'db_index' must be None, True, or False")
+                exceptions.ValidationError(f"{self.__class__.__name__}.{self._name} 'db_index' must be None, True, or False")
             ]
         return []
 
@@ -55,19 +55,19 @@ class Field:
         for _, validator in enumerate(self._validators):
             if not callable(validator):
                 errors.append(
-                    exceptions.ValidationError(f"on {self.__class__.__name__}.{self.name} all validators must be callable.")
+                    exceptions.ValidationError(f"{self.__class__.__name__}.{self._name} all validators must be callable.")
                 )
         return errors
 
     def _check_null_allowed_for_primary_key(self):
         if not isinstance(self._primary_key, bool):
             return [
-                exceptions.ValidationError(f"on {self.__class__.__name__}.{self.name} primary_key value Either True or False")
+                exceptions.ValidationError(f"{self.__class__.__name__}.{self._name} primary_key value Either True or False")
             ]
         if self._null and self._primary_key:
             return [
                 exceptions.ValidationError(
-                    f"on {self.__class__.__name__}.{self.name} for primary_key=True, null must be False",
+                    f"{self.__class__.__name__}.{self._name} for primary_key=True, null must be False",
                     code="null_allowed_for_primary_key",
                 )
             ]
@@ -81,7 +81,7 @@ class Field:
 
     def run_validator(self, value):
         '''
-        Only use for when saving a value in this field.
+        Only use it for saving a value in this field.
         '''
         if value in self.empty_values:
             return
@@ -111,24 +111,24 @@ class Field:
         attrs = kwargs.pop("attrs", {})
         if attrs in validators.EMPTY_VALUES:
             raise exceptions.ValidationError(
-                message=f"Empty field table property {self.__class__.name__}",
+                message=f"Empty field table property {self.__class__.__name__}",
                 code="invalid_field",
             )
         for attr in attrs:
-            cls_attr = hasattr(self, attr)
+            cls_attr = hasattr(self, f"_{attr}")
             if cls_attr:
-                setattr(self, attr, attrs[attr])
+                setattr(self, f"_{attr}", attrs[attr])
             else:
                 raise exceptions.ValidationError(
                     f"get unexprected keyword argument {attr} in {self.__class__.__name__} constructor"
                 )
-        errors = self.check()
+        errors = self._check()
         if errors:
             raise exceptions.ValidationError(errors)
         return self
 
-    def create(self):
-        return self._create().__dict__
+    def create(self, *args, **kwargs):
+        return self._create(*args, **kwargs).__dict__
 
 
 class BooleanField(Field):
@@ -144,8 +144,20 @@ class BooleanField(Field):
         if value in ("f", "False", "0"):
             return False
         raise exceptions.ValidationError(
-            f"on {self.__class__.__name__}.{self.name} Invalid boolean field value", code="invalid", params={"value": value}
+            f"{self.__class__.__name__}.{self._name} Invalid boolean field value", code="invalid", params={"value": value}
         )
+    
+    def _check(self):
+        errors =  super()._check()
+        if self._primary_key:
+            errors.append(exceptions.ValidationError(
+                f"{self.__class__.__name__}.{self._name} boolean field cannot marked as primary key",
+            ))
+        if not isinstance(self._get_default, bool):
+            errors.append(exceptions.ValidationError(
+                f"{self.__class__.__name__}.{self._name} invalid default value: default value should either True or False",
+            ))
+        return errors
 
 
 class StringField(Field): 
@@ -153,15 +165,15 @@ class StringField(Field):
     def to_python(self, value):
         if not isinstance(value, str):
             raise exceptions.ValidationError(
-                f"on {self.__class__.__name__}.{self.name} Invalid string field value",
+                f"{self.__class__.__name__}.{self._name} Invalid string field value",
                 code="invalid",
                 params={"value": value}
             )
         return value
 
 
-    def check(self):
-        errors = super().check()
+    def _check(self):
+        errors = super()._check()
         if (
             not self._max_length
             or not isinstance(self._max_length, int)
@@ -169,13 +181,13 @@ class StringField(Field):
         ):
             errors.append(
                 exceptions.ValidationError(
-                    f"on {self.__class__.__name__}.{self.name} max_length must be int and must not be -negative or zero"
+                    f"{self.__class__.__name__}.{self._name} max_length must be int and must not be -negative or zero"
                 )
             )
         if not isinstance(self._get_default, str):
             errors.append(
                 exceptions.ValidationError(
-                    f"on {self.__class__.__name__}.{self.name} default value of the StringField must be a string"
+                    f"{self.__class__.__name__}.{self._name} default value of the StringField must be a string"
                 )
             )
         return errors
@@ -185,19 +197,19 @@ class TextField(Field):
     def to_python(self, value):
         if not isinstance(value, str):
             raise exceptions.ValidationError(
-                f"on {self.__class__.__name__}.{self.name} Invalid Text field value",
+                f"{self.__class__.__name__}.{self._name} Invalid Text field value",
                 code="invalid",
                 params={"value": value}
             )
         return value
 
 
-    def check(self):
-        errors = super().check()
+    def _check(self):
+        errors = super()._check()
         if not isinstance(self._get_default, str):
             errors.append(
                 exceptions.ValidationError(
-                    f"on {self.__class__.__name__}.{self.name} default value of the TextField must be a string"
+                    f"{self.__class__.__name__}.{self._name} default value of the TextField must be a string"
                 )
             )
         return errors
@@ -214,19 +226,19 @@ class IntegerField(Field):
     def to_python(self, value):
         if not isinstance(value, int):
             raise exceptions.ValidationError(
-                f"on {self.__class__.__name__}.{self.name} Invalid string field value",
+                f"{self.__class__.__name__}.{self._name} Invalid string field value",
                 code="invalid",
                 params={"value": value}
             )
         return value
 
 
-    def check(self):
-        errors = super().check()
+    def _check(self):
+        errors = super()._check()
         if not isinstance(self._get_default, str):
             errors.append(
                 exceptions.ValidationError(
-                    f"on {self.__class__.__name__}.{self.name} default value of the StringField must be a string"
+                    f"{self.__class__.__name__}.{self._name} default value of the StringField must be a string"
                 )
             )
         return errors
