@@ -14,8 +14,7 @@ data = {
             "unique": True,
             "max_length": 30,
         },
-
-    ]
+    ],
 }
 
 

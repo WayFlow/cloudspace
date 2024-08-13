@@ -272,14 +272,13 @@ class DateField(Field): ...
 class DateTimeField(Field): ...
 
 
-
 class FieldMap(Enum):
-    BooleanField=BooleanField
-    StringField=StringField
-    TextField=TextField
-    EmailField=EmailField
-    UrlField=UrlField
-    IntegerField=IntegerField
-    DecimalField=DecimalField
-    DateField=DateField
-    DateTimeField=DateTimeField
+    BooleanField = BooleanField
+    StringField = StringField
+    TextField = TextField
+    EmailField = EmailField
+    UrlField = UrlField
+    IntegerField = IntegerField
+    DecimalField = DecimalField
+    DateField = DateField
+    DateTimeField = DateTimeField

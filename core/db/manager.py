@@ -1,10 +1,11 @@
 from . import fields as f
 
+
 class ModelManager:
 
-    TYPE='type'
-    FIELDS = 'fields'
-    
+    TYPE = "type"
+    FIELDS = "fields"
+
     def __init__(self, **kwargs) -> None:
         self.kwargs = kwargs
 
@@ -18,4 +19,3 @@ class ModelManager:
                 # also validate that on model only creates one primary key
                 created_field = f.FieldMap[field_type].value()
                 print(created_field.create(attrs=field))
-

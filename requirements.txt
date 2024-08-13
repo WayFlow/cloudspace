@@ -3,3 +3,4 @@ Django
 sqlparse
 psycopg2-binary
 django-redis
+pymongo
