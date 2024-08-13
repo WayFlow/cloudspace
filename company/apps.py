@@ -7,4 +7,5 @@ class CompanyConfig(AppConfig):
 
     def ready(self) -> None:
         from mongo import MongoConnectionFactory
+
         MongoConnectionFactory().load_projects()

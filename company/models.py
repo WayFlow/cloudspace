@@ -27,6 +27,5 @@ class Project(models.Model):
     )
     mongo_connection_uri = models.TextField(null=True)
 
-
     def __str__(self) -> str:
         return self.project_name
