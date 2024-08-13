@@ -11,3 +11,10 @@ class Company(models.Model):
     created_by = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="get_user_companies"
     )
+
+class Project(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    project_name = models.CharField(unique=True, max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="get_company_projects")

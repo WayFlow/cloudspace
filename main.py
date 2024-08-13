@@ -1,15 +1,25 @@
-from core.db.fields import *
+from core.db import base
 
-boolean_field = BooleanField()
+data = {
+    "db_name": "test",
+    "fields": [
+        {
+            "name": "id",
+            "type": "StringField",
+            "primary_key": True,
+        },
+        {
+            "name": "name",
+            "type": "StringField",
+            "unique": True,
+            "max_length": 30,
+        },
+
+    ]
+}
+
+
 try:
-    created = boolean_field.create(
-        attrs={
-            "name": "is_active",
-            "default": "ss",
-            "db_index": "ss",
-            "help_text": "If is active then it will shown in query",
-        }
-    )
-    print(created)
+    base.Model.objects.create(**data)
 except Exception as e:
     print(e.messages)

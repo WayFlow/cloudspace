@@ -56,7 +56,7 @@ DATABASES = {
         "NAME": "cloudspace_db",
         "PASSWORD": "1234",
         "USER": "cloudspace_user",
-        "HOST": "localhost",
+        "HOST": "172.16.1.12",
         "PORT": "5432",
     }
 }
@@ -64,7 +64,7 @@ DATABASES = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://localhost:6379/1",
+        "LOCATION": "redis://172.16.1.11:6379/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },

@@ -1,4 +1,8 @@
-class BaseModel(type):
-    def __new__(cls, name, bases, dct):
-        super_new = super().__new__
-        return super_new()
+from . import manager
+
+class Model:
+
+    def __init__(self) -> None:
+        pass
+
+    objects = manager.ModelManager()

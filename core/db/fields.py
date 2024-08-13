@@ -1,6 +1,8 @@
 from core.utils import validators as validators
 from core.utils import exceptions as exceptions
 
+from enum import Enum
+
 
 class NOT_PROVIDED:
     pass
@@ -163,7 +165,7 @@ class BooleanField(Field):
                     f"{self.__class__.__name__}.{self._name} boolean field cannot marked as primary key",
                 )
             )
-        if not self._get_default is NOT_PROVIDED and not isinstance(
+        if not isinstance(self._get_default, NOT_PROVIDED) and not isinstance(
             self._get_default, bool
         ):
             errors.append(
@@ -197,7 +199,7 @@ class StringField(Field):
                     f"{self.__class__.__name__}.{self._name} max_length must be int and must not be -negative or zero"
                 )
             )
-        if not self._get_default is NOT_PROVIDED and not isinstance(
+        if not isinstance(self._get_default, NOT_PROVIDED) and not isinstance(
             self._get_default, str
         ):
             errors.append(
@@ -220,7 +222,7 @@ class TextField(Field):
 
     def _check(self):
         errors = super()._check()
-        if not self._get_default is NOT_PROVIDED and not isinstance(
+        if not isinstance(self._get_default, NOT_PROVIDED) and not isinstance(
             self._get_default, str
         ):
             errors.append(
@@ -250,7 +252,7 @@ class IntegerField(Field):
 
     def _check(self):
         errors = super()._check()
-        if not self._get_default is NOT_PROVIDED and not isinstance(
+        if not isinstance(self._get_default, NOT_PROVIDED) and not isinstance(
             self._get_default, int
         ):
             errors.append(
@@ -268,3 +270,16 @@ class DateField(Field): ...
 
 
 class DateTimeField(Field): ...
+
+
+
+class FieldMap(Enum):
+    BooleanField=BooleanField
+    StringField=StringField
+    TextField=TextField
+    EmailField=EmailField
+    UrlField=UrlField
+    IntegerField=IntegerField
+    DecimalField=DecimalField
+    DateField=DateField
+    DateTimeField=DateTimeField
