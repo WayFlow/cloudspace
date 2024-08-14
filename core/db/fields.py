@@ -1,7 +1,7 @@
-from core.utils import validators as validators
-from core.utils import exceptions as exceptions
-
 from enum import Enum
+
+from core.utils import exceptions as exceptions
+from core.utils import validators as validators
 
 
 class NOT_PROVIDED:

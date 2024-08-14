@@ -1,6 +1,7 @@
-from pymongo import MongoClient
 from collections import defaultdict
 from typing import List
+
+from pymongo import MongoClient
 
 from company.models import Company, Project
 
