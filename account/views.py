@@ -2,15 +2,11 @@ from django.contrib.auth import authenticate, get_user_model
 from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.permissions import AllowAny
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from rest_framework_simplejwt.views import (
-    TokenRefreshView,
-    TokenVerifyView
-
-)
 
 from utils.constants import ResponseDataKey as RSP_KEY
 from utils.constants import ResponseMessage as RSP_MSG
@@ -69,15 +65,3 @@ class SignInView(APIView):
             {RSP_KEY.ERROR_KEY: _(RSP_MSG.INVALID_EMAIL_AND_PASS_MESSAGE)},
             status=status.HTTP_401_UNAUTHORIZED,
         )
-    
-
-class JWTTokenRefreshView(TokenRefreshView):
-
-    def post(self, request, *args, **kwargs):
-        ...
-
-
-class JWTTokenVerifyView(TokenVerifyView):
-
-    def post(self, request, *args, **kwargs):
-        ...
