@@ -30,3 +30,11 @@ class Project(models.Model):
 
     def __str__(self) -> str:
         return self.project_name
+    
+
+class DBSchema(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    db_name = models.CharField(max_length=255)
+    schema = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="get_db_details")

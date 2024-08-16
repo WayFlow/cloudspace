@@ -1,24 +1,29 @@
 from core.db import base
+from core.utils import exceptions
 
 data = {
-    "db_name": "test",
+    "db_name": "test_db",
     "fields": [
         {
-            "name": "id",
-            "type": "StringField",
-            "primary_key": True,
+            "name": "address",
+            "type": "TextField",
+            "default": "some"
         },
         {
             "name": "name",
             "type": "StringField",
             "unique": True,
             "max_length": 30,
+            "default": "name",
         },
     ],
 }
 
 
 try:
-    base.Model.objects.create(**data)
-except Exception as e:
+    test_db = base.Model.objects().create(**data)
+    print(test_db)
+except exceptions.ValidationError as e:
     print(e.messages)
+except Exception as e:
+    print(e)

@@ -2,7 +2,7 @@ from enum import Enum
 
 from core.utils import exceptions as exceptions
 from core.utils import validators as validators
-
+from .defaults import DBDefaults
 
 class NOT_PROVIDED:
     pass
@@ -81,10 +81,22 @@ class Field:
             ]
         return []
 
+    def _is_default_callable(self):
+        if (
+            type(self._default) == str
+            and len(self._default) > 7
+            and self._default[:7] == "_call__"
+        ):
+            return True
+        return False
+
     @property
     def _get_default(self):
-        if callable(self._default):
-            return self._default()
+        if self._is_default_callable():
+            db_default = DBDefaults()
+            attr = getattr(db_default, self._default)
+            default_value = attr()
+            return default_value
         return self._default
 
     def run_validator(self, value):
@@ -135,8 +147,12 @@ class Field:
             raise exceptions.ValidationError(errors)
         return self
 
+    @property
+    def primary_key(self):
+        return self._primary_key
+
     def create(self, *args, **kwargs):
-        return self._create(*args, **kwargs).__dict__
+        return self._create(*args, **kwargs)
 
 
 class BooleanField(Field):
@@ -187,6 +203,11 @@ class StringField(Field):
             )
         return value
 
+
+    '''
+    Why I need to pass default in every field ?
+    validations are not working properly 
+    '''
     def _check(self):
         errors = super()._check()
         if (
