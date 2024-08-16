@@ -20,6 +20,7 @@ class Company(models.Model):
 
 class Project(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    secret_key = models.CharField(max_length=255)
     project_name = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -35,6 +36,8 @@ class Project(models.Model):
 class DBSchema(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     db_name = models.CharField(max_length=255)
-    schema = models.JSONField()
+    current_schema = models.JSONField()
+    last_schema = models.JSONField(null=True)
+    updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="get_db_details")
