@@ -1,8 +1,10 @@
-from account.models import Account
-from datetime import datetime, timedelta
+from django.contrib.auth import get_user_model
 from rest_framework import exceptions
 from rest_framework.authentication import BaseAuthentication
 import jwt
+from .token import TokenService
+
+Account = get_user_model()
 
 """
  TODO: this class should be implemented in a way such that
@@ -34,12 +36,14 @@ class JWTAuthentication(BaseAuthentication):
                 "Invalid token header. Token string should not include type prefix."
             )
         try:
-            # Try to parse token here
-            ...
+            access_token = TokenService.verify_access(token)
+            account = Account.objects.filter(id=access_token.user_id).first()
+            if account is None:
+                raise exceptions.AuthenticationFailed("Account not found")
+            return (account, token)
         except jwt.ExpiredSignatureError:
             raise exceptions.AuthenticationFailed("Token expired!")
         except jwt.DecodeError:
             raise exceptions.AuthenticationFailed("Token signature is invalid.")
         except Exception as e:
             raise exceptions.AuthenticationFailed(str(e))
-        # start and filter user from here

@@ -1,4 +1,5 @@
-from django.core import cache
+from django.core.cache import cache
+from utils.time import get_timestamp
 
 
 class RedisAuthService:
@@ -7,12 +8,9 @@ class RedisAuthService:
         self.token = token
 
     def create_auth(self):
-        cache.set(self.token.jti, self.token.user_id, self.token.exp)
+        cache.set(self.token.jti, self.token.user_id, get_timestamp(self.token.exp))
 
     def delete_auth(self): ...
 
     def fetch_auth(self):
         return cache.get(self.token.jti)
-
-    def has_auth(self):
-        return self.fetch_auth != None
