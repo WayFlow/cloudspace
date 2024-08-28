@@ -69,5 +69,5 @@ class MongoConnectionFactory:
     @classmethod
     def get_connection(cls, company_id, project_id):
         if not f"{company_id}_{project_id}" in cls._instance._connections_factory:
-            raise Exception("No connection for give detaisl found in factory.")
+            raise Exception("No connection for give details found in factory.")
         return cls._instance._connections_factory[f"{company_id}_{project_id}"]

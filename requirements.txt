@@ -4,5 +4,5 @@ sqlparse
 psycopg2-binary
 django-redis
 pymongo
+PyJWT
 djangorestframework
-djangorestframework-simplejwt

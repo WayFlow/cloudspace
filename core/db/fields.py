@@ -4,6 +4,7 @@ from core.utils import exceptions as exceptions
 from core.utils import validators as validators
 from .defaults import DBDefaults
 
+
 class NOT_PROVIDED:
     pass
 
@@ -203,11 +204,11 @@ class StringField(Field):
             )
         return value
 
-
-    '''
+    """
     Why I need to pass default in every field ?
     validations are not working properly 
-    '''
+    """
+
     def _check(self):
         errors = super()._check()
         if (

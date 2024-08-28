@@ -2,6 +2,7 @@ import uuid
 
 from django.contrib.auth import get_user_model
 from django.db import models
+from utils.crypto import generate_secret_key
 
 User = get_user_model()
 
@@ -20,7 +21,7 @@ class Company(models.Model):
 
 class Project(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    secret_key = models.CharField(max_length=255)
+    secret_key = models.CharField(max_length=255, default=generate_secret_key)
     project_name = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -31,7 +32,10 @@ class Project(models.Model):
 
     def __str__(self) -> str:
         return self.project_name
-    
+
+
+# use save singal to reload connection
+
 
 class DBSchema(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -40,4 +44,6 @@ class DBSchema(models.Model):
     last_schema = models.JSONField(null=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="get_db_details")
+    project = models.ForeignKey(
+        Project, on_delete=models.CASCADE, related_name="get_db_details"
+    )
