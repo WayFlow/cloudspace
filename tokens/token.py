@@ -32,7 +32,7 @@ class Token:
     @classmethod
     def verify(cls, token: str):
         try:
-            payload = jwt.decode(token, setattr, algorithm="HS256")
+            payload = jwt.decode(token, SECRET_KEY, algorithm="HS256")
             return cls(**payload)
         except Exception as e:
             raise e
@@ -48,6 +48,13 @@ class AccessToken(Token):
 
 class TokenService:
 
+    def __init__(self, user: Account):
+        """
+        creates a new token service with same JTI
+        """
+        self.user = user
+        self.jti = self._generate_jti_id()
+
     @classmethod
     def _get_utc_time(self):
         return timezone.now()
@@ -60,32 +67,28 @@ class TokenService:
         jti_id = hashlib.md5(combined_string.encode()).hexdigest()
         return jti_id
 
-    @classmethod
-    def refresh(self, user: Account, lifetime=timedelta(days=30)) -> RefreshToken:
+    def create_refresh_token(self, lifetime=timedelta(days=30)) -> RefreshToken:
         iat = self._get_utc_time()
         data = {
-            "user_id": str(user.id),
+            "user_id": str(self.user.id),
             "iat": iat,
             "exp": iat + lifetime,
-            "jti": self._generate_jti_id(),
+            "jti": self.jti,
         }
         token = RefreshToken(**data)
         redis_auth = RedisAuthService(token)
         redis_auth.create_auth()
         return token
 
-    @classmethod
-    def access(self, user: Account, lifetime=timedelta(minutes=5)) -> AccessToken:
+    def create_access_token(self, lifetime=timedelta(minutes=5)) -> AccessToken:
         iat = self._get_utc_time()
         data = {
-            "user_id": str(user.id),
+            "user_id": str(self.user.id),
             "iat": iat,
             "exp": iat + lifetime,
-            "jti": self._generate_jti_id(),
+            "jti": self.jti,
         }
         token = AccessToken(**data)
-        redis_auth = RedisAuthService(token)
-        redis_auth.create_auth()
         return token
 
     @classmethod
@@ -119,4 +122,3 @@ class TokenService:
             return access
         except Exception as e:
             raise e
-        

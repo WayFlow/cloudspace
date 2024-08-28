@@ -24,15 +24,16 @@ class SignUpView(APIView):
         serializer = AccountSerializer(data=request.data)
         if serializer.is_valid():
             account = serializer.save()
-            refresh = TokenService.refresh(account)
-            access = TokenService.access(account)
+            ts = TokenService(account)
+            refresh = ts.create_refresh_token()
+            access = ts.create_access_token()
             creds = {
                 RSP_KEY.MESSAGE_KEY: RSP_MSG.SUCCESSFULL_ACCOUNT_CREATED,
                 RSP_KEY.REFRESH_TOKEN_KEY: refresh.token,
                 RSP_KEY.ACCESS_TOKEN_KEY: access.token,
                 RSP_KEY.ACCESS_TOKEN_EXPIRES: get_timestamp(access.exp),
                 RSP_KEY.REFRESH_TOKEN_EXPIRES: get_timestamp(refresh.exp),
-                RSP_KEY.USER_ID: account.id
+                RSP_KEY.USER_ID: account.id,
             }
             return Response(creds, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -52,8 +53,9 @@ class SignInView(APIView):
         user = authenticate(request, email=email, password=password)
         if user is not None:
             if user.is_active:
-                refresh = TokenService.refresh(user)
-                access = TokenService.access(user)
+                ts = TokenService(user)
+                refresh = ts.create_refresh_token()
+                access = ts.create_access_token()
                 creds = {
                     RSP_KEY.MESSAGE_KEY: RSP_MSG.ACCOUNT_SIGNIN_SUCCESS,
                     RSP_KEY.REFRESH_TOKEN_KEY: refresh.token,
@@ -71,3 +73,8 @@ class SignInView(APIView):
             {RSP_KEY.ERROR_KEY: _(RSP_MSG.INVALID_EMAIL_AND_PASS_MESSAGE)},
             status=status.HTTP_401_UNAUTHORIZED,
         )
+
+
+class ValidateAccessToken(APIView):
+
+    def get(self, request, *args, **kwargs): ...
