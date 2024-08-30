@@ -3,6 +3,7 @@ from rest_framework import exceptions
 from rest_framework.authentication import BaseAuthentication
 import jwt
 from .token import TokenService
+import json
 
 Account = get_user_model()
 
@@ -20,11 +21,12 @@ Account = get_user_model()
 class JWTAuthentication(BaseAuthentication):
 
     def authenticate(self, request):
-        token = request.COOKIES.get("access_token")
-        if not token:
+        data = request.COOKIES.get("cred")
+        if not data:
             return None
-
+        data = json.loads(data)
         try:
+            token = data["access_token"]
             access_token = TokenService.verify_access(token)
             account = Account.objects.filter(id=access_token.user_id).first()
             if account is None:

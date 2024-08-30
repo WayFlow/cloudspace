@@ -1,3 +1,4 @@
+import json
 from django.contrib.auth import authenticate, get_user_model
 from django.utils.translation import gettext_lazy as _
 from rest_framework import status
@@ -8,13 +9,21 @@ from rest_framework.views import APIView
 
 
 from utils.constants import ResponseDataKey as RSP_KEY
-from tokens.token import TokenService, RefreshToken
+from tokens.token import TokenService, AccessToken
 from utils.constants import ResponseMessage as RSP_MSG
 from utils.time import get_timestamp
 
 from .serializers import AccountSerializer
 
 Account = get_user_model()
+
+def cred_builder(access_token : AccessToken):
+    data = {
+        'access_token': access_token.token,
+        'exp': get_timestamp(access_token.exp),
+        'user_id': access_token.user_id
+    }
+    return json.dumps(data)
 
 
 class RegisterAPIView(APIView):
@@ -32,12 +41,12 @@ class RegisterAPIView(APIView):
                 RSP_KEY.ACCESS_TOKEN_EXPIRES: get_timestamp(access.exp),
             }, status=status.HTTP_201_CREATED)
             response.set_cookie(
-                key='access_token',
-                value=access.token,
+                key='cred',
+                value=cred_builder(access),
                 httponly=True,
                 secure=False,  # TODO: Ensure this is True in production
                 samesite='Strict',
-                max_age=get_timestamp(access.exp)
+                max_age=24 * 60 * 60
             )
 
             return response
@@ -46,6 +55,7 @@ class RegisterAPIView(APIView):
 
 class LoginAPIView(APIView):
     permission_classes = [AllowAny]
+    authentication_classes = []
 
     def post(self, request, *args, **kwargs):
         email = request.data.get("email")
@@ -66,12 +76,12 @@ class LoginAPIView(APIView):
                     RSP_KEY.ACCESS_TOKEN_EXPIRES: get_timestamp(access.exp),
                 }, status=status.HTTP_200_OK)
                 response.set_cookie(
-                    key='access_token',
-                    value=access.token,
+                    key='cred',
+                    value=cred_builder(access),
                     httponly=True,
                     secure=False,  #TODO: Ensure this is True in production
                     samesite='Strict',
-                    max_age=get_timestamp(access.exp)
+                    max_age=24 * 60 * 60
                 )
 
                 return response
@@ -88,12 +98,12 @@ class LoginAPIView(APIView):
 class LogoutView(APIView):
 
     def post(self, request : Request, *args, **kwargs):
-        token = request.COOKIES.get("access_token")
+        token : AccessToken = request.token
         if not token:
             return Response({"detail": "No token provided"}, status=status.HTTP_401_UNAUTHORIZED)
         response = Response({
             RSP_KEY.MESSAGE_KEY: "Logged out successfully."
         }, status=status.HTTP_200_OK)
-        request.token.remove_access_token()
-        response.delete_cookie('access_token')
+        token.remove_access_token()
+        response.delete_cookie('cred')
         return response
