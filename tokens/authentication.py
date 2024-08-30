@@ -19,27 +19,17 @@ Account = get_user_model()
 
 class JWTAuthentication(BaseAuthentication):
 
-    keyword = "Bearer"
-
     def authenticate(self, request):
-        auth_header: str = request.headers.get("Authorization")
-        if not auth_header:
+        token = request.COOKIES.get("access_token")
+        if not token:
             return None
-        try:
-            prefix, token = auth_header.split(" ")
-        except ValueError:
-            raise exceptions.AuthenticationFailed(
-                "Invalid token header not credentials were provided."
-            )
-        if prefix != self.keyword:
-            raise exceptions.AuthenticationFailed(
-                "Invalid token header. Token string should not include type prefix."
-            )
+
         try:
             access_token = TokenService.verify_access(token)
             account = Account.objects.filter(id=access_token.user_id).first()
             if account is None:
                 raise exceptions.AuthenticationFailed("Account not found")
+            request.token = access_token
             return (account, token)
         except jwt.ExpiredSignatureError:
             raise exceptions.AuthenticationFailed("Token expired!")

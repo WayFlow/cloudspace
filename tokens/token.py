@@ -32,10 +32,15 @@ class Token:
     @classmethod
     def verify(cls, token: str):
         try:
-            payload = jwt.decode(token, SECRET_KEY, algorithm="HS256")
+            payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
             return cls(**payload)
         except Exception as e:
             raise e
+        
+    
+    def remove_access_token(self):
+        redis_auth = RedisAuthService(self)
+        redis_auth.delete_auth()
 
 
 class RefreshToken(Token):
@@ -44,6 +49,7 @@ class RefreshToken(Token):
 
 class AccessToken(Token):
     token_type = "access"
+
 
 
 class TokenService:
@@ -67,20 +73,8 @@ class TokenService:
         jti_id = hashlib.md5(combined_string.encode()).hexdigest()
         return jti_id
 
-    def create_refresh_token(self, lifetime=timedelta(days=30)) -> RefreshToken:
-        iat = self._get_utc_time()
-        data = {
-            "user_id": str(self.user.id),
-            "iat": iat,
-            "exp": iat + lifetime,
-            "jti": self.jti,
-        }
-        token = RefreshToken(**data)
-        redis_auth = RedisAuthService(token)
-        redis_auth.create_auth()
-        return token
 
-    def create_access_token(self, lifetime=timedelta(minutes=5)) -> AccessToken:
+    def create_access_token(self, lifetime=timedelta(days=1)) -> AccessToken:
         iat = self._get_utc_time()
         data = {
             "user_id": str(self.user.id),
@@ -89,23 +83,10 @@ class TokenService:
             "jti": self.jti,
         }
         token = AccessToken(**data)
+        redis_auth = RedisAuthService(token)
+        redis_auth.create_auth()
         return token
 
-    @classmethod
-    def verify_refresh(self, token) -> RefreshToken:
-        try:
-            refresh: RefreshToken = RefreshToken.verify(token)
-            if refresh.type != RefreshToken.token_type:
-                raise Exception("Token type is not valid")
-            redis_auth = RedisAuthService(refresh)
-            auth = redis_auth.fetch_auth()
-            if not auth:
-                raise Exception("Token Expired")
-            if auth != refresh.user_id:
-                raise Exception("user not matching.")
-            return refresh
-        except Exception as e:
-            raise e
 
     @classmethod
     def verify_access(self, token) -> AccessToken:

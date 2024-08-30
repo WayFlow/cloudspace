@@ -14,6 +14,7 @@ class AccountSerializer(serializers.ModelSerializer):
             "email",
             "password",
             "details",
+            "username",
         )
 
     def create(self, validated_data):
