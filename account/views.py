@@ -18,9 +18,10 @@ from .serializers import AccountSerializer
 Account = get_user_model()
 
 def cred_builder(access_token : AccessToken):
+    # TODO: encrypt the access token
     data = {
         'access_token': access_token.token,
-        'exp': get_timestamp(access_token.exp),
+        'at_expires': get_timestamp(access_token.exp),
         'user_id': access_token.user_id
     }
     return json.dumps(data)
@@ -45,7 +46,7 @@ class RegisterAPIView(APIView):
                 value=cred_builder(access),
                 httponly=True,
                 secure=False,  # TODO: Ensure this is True in production
-                samesite='Strict',
+                samesite='lax',
                 max_age=24 * 60 * 60
             )
 
@@ -80,7 +81,7 @@ class LoginAPIView(APIView):
                     value=cred_builder(access),
                     httponly=True,
                     secure=False,  #TODO: Ensure this is True in production
-                    samesite='Strict',
+                    samesite='lax',
                     max_age=24 * 60 * 60
                 )
 

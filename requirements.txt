@@ -6,3 +6,4 @@ django-redis
 pymongo
 PyJWT
 djangorestframework
+django-cors-headers
