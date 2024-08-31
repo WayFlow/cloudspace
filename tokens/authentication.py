@@ -20,6 +20,10 @@ Account = get_user_model()
 
 class JWTAuthentication(BaseAuthentication):
 
+    '''
+    Create one more authentication header to be verify genuien requet
+    '''
+
     def authenticate(self, request):
         data = request.COOKIES.get("cred")
         if not data:

@@ -99,7 +99,7 @@ class LoginAPIView(APIView):
 class LogoutView(APIView):
 
     def post(self, request : Request, *args, **kwargs):
-        token : AccessToken = request.token
+        token : AccessToken | None = request.token
         if not token:
             return Response({"detail": "No token provided"}, status=status.HTTP_401_UNAUTHORIZED)
         response = Response({
