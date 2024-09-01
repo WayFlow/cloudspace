@@ -51,7 +51,7 @@ class ModelManager:
                 # TODO: support so that list of validators names can be saved
                 field_data = f.FieldMap[field_type].value()
                 field_object = field_data.create(attrs=field)
-                field_objects.append(field_data)
+                field_objects.append(field_object)
         return field_objects
 
     def _create(self, *args, **kwargs):

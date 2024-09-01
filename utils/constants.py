@@ -14,5 +14,5 @@ class ResponseMessage:
     SUCCESSFULL_ACCOUNT_CREATED = "Your account was created successfully"
     ACCOUNT_SIGNIN_SUCCESS = "Signing in successfully"
     ERROR_EMAIL_AND_PASS_REQUIRED_MESSAGE = "Email and password are required."
-    INVALID_EMAIL_AND_PASS_MESSAGE = "Invalid email and password"
+    INVALID_EMAIL_AND_PASS_MESSAGE = "Invalid email or password"
     USER_ACCOUNT_DISABLED_MESSAGE = "Your account is disabled"

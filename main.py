@@ -27,10 +27,3 @@
 #     print(e.messages)
 # except Exception as e:
 #     print(e)
-
-from tokens.token import *
-
-acc = Account.objects.all().first()
-
-refresh = RefreshToken(acc).create()
-access = AccessToken(acc).create()

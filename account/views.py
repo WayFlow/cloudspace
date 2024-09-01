@@ -31,6 +31,11 @@ class RegisterAPIView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
+        data = request.data
+        data['username'] = data['email']
+        account = Account.objects.filter(email=data['email']).first()
+        if account:
+            return Response({RSP_KEY.ERROR_KEY: 'Email already registered'}, status=status.HTTP_400_BAD_REQUEST)
         serializer = AccountSerializer(data=request.data)
         if serializer.is_valid():
             account = serializer.save()
