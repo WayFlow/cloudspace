@@ -43,6 +43,7 @@ class Account(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
+    verified = models.BooleanField(default=False)
     details = models.JSONField(default=dict)
 
     USERNAME_FIELD = "email"

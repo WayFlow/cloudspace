@@ -6,6 +6,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.contrib.auth.models import update_last_login
 
 
 from utils.constants import ResponseDataKey as RSP_KEY
@@ -13,7 +14,7 @@ from tokens.token import TokenService, AccessToken
 from utils.constants import ResponseMessage as RSP_MSG
 from utils.time import get_timestamp
 
-from .serializers import AccountSerializer
+from .serializers import AccountSerializer, AccountDataSerializer
 
 Account = get_user_model()
 
@@ -39,6 +40,7 @@ class RegisterAPIView(APIView):
         serializer = AccountSerializer(data=request.data)
         if serializer.is_valid():
             account = serializer.save()
+            update_last_login(None, account)
             ts = TokenService(account)
             access = ts.create_access_token()
             response = Response({
@@ -74,6 +76,7 @@ class LoginAPIView(APIView):
         user = authenticate(request, email=email, password=password)
         if user is not None:
             if user.is_active:
+                update_last_login(None, user)
                 ts = TokenService(user)
                 access = ts.create_access_token()
                 response = Response({
@@ -113,3 +116,10 @@ class LogoutView(APIView):
         token.remove_access_token()
         response.delete_cookie('cred')
         return response
+    
+
+class AccountView(APIView):
+
+    def get(self, request : Request, *args, **kwargs):
+        serializer = AccountDataSerializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
