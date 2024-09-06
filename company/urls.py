@@ -1,3 +1,6 @@
 from django.urls import path
+from .views import CreateCompanyView
 
-urlpatterns = []
+urlpatterns = [
+    path('create', CreateCompanyView.as_view(), name='create company')
+]
