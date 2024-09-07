@@ -5,11 +5,19 @@ from utils.errors import build_error_message
 from .serializers import CompanySerializer
 from rest_framework.response import Response
 from rest_framework.status import *
+from .models import Company
 
 from utils.constants import ResponseDataKey
 
 
-class CompanyListAPIView(ListAPIView): ...
+class CompanyListAPIView(ListAPIView):
+    serializer_class = CompanySerializer
+    
+    def get_queryset(self):
+        queryset = Company.objects.filter(created_by=self.request.user)
+        return queryset
+    
+
 
 
 class CreateCompanyView(APIView):
@@ -38,10 +46,7 @@ class CreateCompanyView(APIView):
             if serializer.is_valid():
                 serializer.save()
                 return Response(
-                    {
-                        ResponseDataKey.DATA_KEY: serializer.data,
-                        ResponseDataKey.MESSAGE_KEY: "Successfully created!",
-                    },
+                   serializer.data,
                     status=HTTP_201_CREATED,
                 )
             return Response(
