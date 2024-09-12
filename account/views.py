@@ -18,12 +18,13 @@ from .serializers import AccountSerializer, AccountDataSerializer
 
 Account = get_user_model()
 
-def cred_builder(access_token : AccessToken):
+
+def cred_builder(access_token: AccessToken):
     # TODO: encrypt the access token
     data = {
-        'access_token': access_token.token,
-        'at_expires': get_timestamp(access_token.exp),
-        'user_id': access_token.user_id
+        "access_token": access_token.token,
+        "at_expires": get_timestamp(access_token.exp),
+        "user_id": access_token.user_id,
     }
     return json.dumps(data)
 
@@ -33,28 +34,34 @@ class RegisterAPIView(APIView):
 
     def post(self, request, *args, **kwargs):
         data = request.data
-        data['username'] = data['email']
-        account = Account.objects.filter(email=data['email']).first()
+        data["username"] = data["email"]
+        account = Account.objects.filter(email=data["email"]).first()
         if account:
-            return Response({RSP_KEY.ERROR_KEY: 'Email already registered'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {RSP_KEY.ERROR_KEY: "Email already registered"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         serializer = AccountSerializer(data=request.data)
         if serializer.is_valid():
             account = serializer.save()
             update_last_login(None, account)
             ts = TokenService(account)
             access = ts.create_access_token()
-            response = Response({
-                RSP_KEY.MESSAGE_KEY: RSP_MSG.SUCCESSFULL_ACCOUNT_CREATED,
-                RSP_KEY.USER_ID: account.id,
-                RSP_KEY.ACCESS_TOKEN_EXPIRES: get_timestamp(access.exp),
-            }, status=status.HTTP_201_CREATED)
+            response = Response(
+                {
+                    RSP_KEY.MESSAGE_KEY: RSP_MSG.SUCCESSFULL_ACCOUNT_CREATED,
+                    RSP_KEY.USER_ID: account.id,
+                    RSP_KEY.ACCESS_TOKEN_EXPIRES: get_timestamp(access.exp),
+                },
+                status=status.HTTP_201_CREATED,
+            )
             response.set_cookie(
-                key='cred',
+                key="cred",
                 value=cred_builder(access),
                 httponly=True,
                 secure=False,  # TODO: Ensure this is True in production
-                samesite='lax',
-                max_age=24 * 60 * 60
+                samesite="lax",
+                max_age=24 * 60 * 60,
             )
 
             return response
@@ -79,18 +86,21 @@ class LoginAPIView(APIView):
                 update_last_login(None, user)
                 ts = TokenService(user)
                 access = ts.create_access_token()
-                response = Response({
-                    RSP_KEY.MESSAGE_KEY: RSP_MSG.ACCOUNT_SIGNIN_SUCCESS,
-                    RSP_KEY.USER_ID: user.id,
-                    RSP_KEY.ACCESS_TOKEN_EXPIRES: get_timestamp(access.exp),
-                }, status=status.HTTP_200_OK)
+                response = Response(
+                    {
+                        RSP_KEY.MESSAGE_KEY: RSP_MSG.ACCOUNT_SIGNIN_SUCCESS,
+                        RSP_KEY.USER_ID: user.id,
+                        RSP_KEY.ACCESS_TOKEN_EXPIRES: get_timestamp(access.exp),
+                    },
+                    status=status.HTTP_200_OK,
+                )
                 response.set_cookie(
-                    key='cred',
+                    key="cred",
                     value=cred_builder(access),
                     httponly=True,
-                    secure=False,  #TODO: Ensure this is True in production
-                    samesite='lax',
-                    max_age=24 * 60 * 60
+                    secure=False,  # TODO: Ensure this is True in production
+                    samesite="lax",
+                    max_age=24 * 60 * 60,
                 )
 
                 return response
@@ -102,24 +112,26 @@ class LoginAPIView(APIView):
             {RSP_KEY.ERROR_KEY: _(RSP_MSG.INVALID_EMAIL_AND_PASS_MESSAGE)},
             status=status.HTTP_401_UNAUTHORIZED,
         )
-    
+
 
 class LogoutView(APIView):
 
-    def post(self, request : Request, *args, **kwargs):
-        token : AccessToken | None = request.token
+    def post(self, request: Request, *args, **kwargs):
+        token: AccessToken | None = request.token
         if not token:
-            return Response({"detail": "No token provided"}, status=status.HTTP_401_UNAUTHORIZED)
-        response = Response({
-            RSP_KEY.MESSAGE_KEY: "Logged out successfully."
-        }, status=status.HTTP_200_OK)
+            return Response(
+                {"detail": "No token provided"}, status=status.HTTP_401_UNAUTHORIZED
+            )
+        response = Response(
+            {RSP_KEY.MESSAGE_KEY: "Logged out successfully."}, status=status.HTTP_200_OK
+        )
         token.remove_access_token()
-        response.delete_cookie('cred')
+        response.delete_cookie("cred")
         return response
-    
+
 
 class AccountView(APIView):
 
-    def get(self, request : Request, *args, **kwargs):
+    def get(self, request: Request, *args, **kwargs):
         serializer = AccountDataSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)

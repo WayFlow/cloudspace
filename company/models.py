@@ -37,8 +37,9 @@ class Project(models.Model):
 class ProjectEnvironment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     env = models.CharField(max_length=30)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='get_peroject_envs')
-
+    project = models.ForeignKey(
+        Project, on_delete=models.CASCADE, related_name="get_project_envs"
+    )
 
 
 class DBSchema(models.Model):
@@ -61,6 +62,10 @@ class DBSecret(models.Model):
     db_project_id = models.CharField(max_length=120)
     cluster_name = models.CharField(max_length=120)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True) 
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='get_db_secret')
-    env = models.ForeignKey(ProjectEnvironment, on_delete=models.CASCADE, related_name='get_env_secrets')
+    updated_at = models.DateTimeField(auto_now=True)
+    company = models.ForeignKey(
+        Company, on_delete=models.CASCADE, related_name="get_db_secret"
+    )
+    env = models.ForeignKey(
+        ProjectEnvironment, on_delete=models.CASCADE, related_name="get_env_secrets"
+    )

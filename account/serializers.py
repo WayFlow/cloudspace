@@ -34,9 +34,8 @@ class AccountDataSerializer(serializers.ModelSerializer):
         model = Account
         fields = "__all__"
 
-
     def to_representation(self, instance):
         repr = super().to_representation(instance)
         companies = instance.get_user_companies.all()
-        repr['companies'] = CompanySerializer(companies, many=True).data
+        repr["companies"] = CompanySerializer(companies, many=True).data
         return repr

@@ -2,7 +2,11 @@ from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 
 from utils.errors import build_error_message
-from .serializers import CompanySerializer
+from .serializers import (
+    CompanySerializer,
+    ProjectSerializer,
+    ProjectEnvironmentSerializer,
+)
 from rest_framework.response import Response
 from rest_framework.status import *
 from .models import Company
@@ -12,12 +16,10 @@ from utils.constants import ResponseDataKey
 
 class CompanyListAPIView(ListAPIView):
     serializer_class = CompanySerializer
-    
+
     def get_queryset(self):
         queryset = Company.objects.filter(created_by=self.request.user)
         return queryset
-    
-
 
 
 class CreateCompanyView(APIView):
@@ -46,7 +48,7 @@ class CreateCompanyView(APIView):
             if serializer.is_valid():
                 serializer.save()
                 return Response(
-                   serializer.data,
+                    serializer.data,
                     status=HTTP_201_CREATED,
                 )
             return Response(
@@ -54,7 +56,44 @@ class CreateCompanyView(APIView):
                 status=HTTP_400_BAD_REQUEST,
             )
         except Exception as e:
-            print(e)
+            return Response(
+                {ResponseDataKey.ERROR_KEY: str(e)}, status=HTTP_400_BAD_REQUEST
+            )
+
+
+class CreateProjectView(APIView):
+
+    def post(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            serializer = ProjectSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=HTTP_201_CREATED)
+            return Response(
+                {ResponseDataKey.ERROR_KEY: build_error_message(serializer.errors)},
+                status=HTTP_400_BAD_REQUEST,
+            )
+        except Exception as e:
+            return Response(
+                {ResponseDataKey.ERROR_KEY: str(e)}, status=HTTP_400_BAD_REQUEST
+            )
+
+
+class CreateProjectEnvView(APIView):
+
+    def post(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            serializer = ProjectEnvironmentSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=HTTP_201_CREATED)
+            return Response(
+                {ResponseDataKey.ERROR_KEY: build_error_message(serializer.errors)},
+                status=HTTP_400_BAD_REQUEST,
+            )
+        except Exception as e:
             return Response(
                 {ResponseDataKey.ERROR_KEY: str(e)}, status=HTTP_400_BAD_REQUEST
             )
