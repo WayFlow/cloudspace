@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer
-from .models import Company, Project, ProjectEnvironment
+from .models import Company, Project, Environment
 
 
 class CompanySerializer(ModelSerializer):
@@ -22,13 +22,8 @@ class ProjectSerializer(ModelSerializer):
         return repr
 
 
-class ProjectEnvironmentSerializer(ModelSerializer):
+class EnvironmentSerializer(ModelSerializer):
 
     class Meta:
-        model = ProjectEnvironment
+        model = Environment
         fields = "__all__"
-
-    def to_representation(self, instance: ProjectEnvironment):
-        repr = super().to_representation(instance)
-        repr["project"] = CompanySerializer(instance.project).data
-        return repr

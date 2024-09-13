@@ -1,15 +1,16 @@
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
+from rest_framework.generics import ListCreateAPIView
 
 from utils.errors import build_error_message
 from .serializers import (
     CompanySerializer,
     ProjectSerializer,
-    ProjectEnvironmentSerializer,
+    EnvironmentSerializer,
 )
 from rest_framework.response import Response
 from rest_framework.status import *
-from .models import Company
+from .models import Company, Project
 
 from utils.constants import ResponseDataKey
 
@@ -61,9 +62,14 @@ class CreateCompanyView(APIView):
             )
 
 
-class CreateProjectView(APIView):
+class ProjectView(ListCreateAPIView):
+    serializer_class = ProjectSerializer
 
-    def post(self, request, *args, **kwargs):
+    def get_queryset(self):
+        queryset = Project.objects.filter(company__created_by=self.request.user)
+        return queryset
+
+    def create(self, request, *args, **kwargs):
         try:
             data = request.data
             serializer = ProjectSerializer(data=data)
@@ -80,12 +86,12 @@ class CreateProjectView(APIView):
             )
 
 
-class CreateProjectEnvView(APIView):
+class CreateEnvironmentView(APIView):
 
     def post(self, request, *args, **kwargs):
         try:
             data = request.data
-            serializer = ProjectEnvironmentSerializer(data=data)
+            serializer = EnvironmentSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=HTTP_201_CREATED)

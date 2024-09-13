@@ -34,12 +34,9 @@ class Project(models.Model):
         return self.project_name
 
 
-class ProjectEnvironment(models.Model):
+class Environment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     env = models.CharField(max_length=30)
-    project = models.ForeignKey(
-        Project, on_delete=models.CASCADE, related_name="get_project_envs"
-    )
 
 
 class DBSchema(models.Model):
@@ -67,5 +64,5 @@ class DBSecret(models.Model):
         Company, on_delete=models.CASCADE, related_name="get_db_secret"
     )
     env = models.ForeignKey(
-        ProjectEnvironment, on_delete=models.CASCADE, related_name="get_env_secrets"
+        Environment, on_delete=models.CASCADE, related_name="get_env_secrets"
     )
