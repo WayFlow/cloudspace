@@ -39,14 +39,28 @@ services:
     volumes:
       - cldspcPg:/var/lib/postgresql/data
   
+  neo:
+    image: neo4j:latest
+    container_name: cloudspace_neo_db
+    networks:
+      net:
+        ipv4_address: 172.16.1.13
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      - NEO4J_AUTH=neo4j/Wonderful@123
+    volumes:
+      - cldspcNeo:/var/lib/neo4j/data
+  
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: cloudspace_pgadmin
     networks:
       net:
-        ipv4_address: 172.16.1.13
+        ipv4_address: 172.16.1.14
     ports:
-      - "5500:80"  # PgAdmin UI
+      - "5500:80"
     environment:
       - PGADMIN_DEFAULT_EMAIL=suyashmadhesia@gmail.com
       - PGADMIN_DEFAULT_PASSWORD=Wonderful@123
@@ -57,6 +71,7 @@ volumes:
   cldspcRd:
   cldspcPg:
   cldspcPgadmin:
+  cldspcNeo:
 
 networks:
   net:

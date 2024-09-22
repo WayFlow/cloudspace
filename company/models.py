@@ -73,3 +73,23 @@ class DBSecret(models.Model):
     env = models.ForeignKey(
         Environment, on_delete=models.CASCADE, related_name="get_env_secrets"
     )
+
+
+class API(models.Model):
+
+    class RequestMethod(models.TextChoices):
+        GET="GET"
+        POST="POST"
+        PUT="PUT"
+        DELETE="DELETE"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=120)
+    description = models.TextField(null=True, blank=True)
+    method = models.CharField(max_length=10, choices=RequestMethod.choices)
+    endpoint = models.TextField()
+    query_params = models.JSONField(default=dict)
+    request_body = models.JSONField(default=dict)
+    authenticated = models.BooleanField(default=False)
+    flow = models.CharField(max_length=120, null=True, blank=True)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='get_project_apis')
