@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     "account.apps.AccountConfig",
     "company.apps.CompanyConfig",
     "tokens.apps.TokensConfig",
+    "core.apps.CoreConfig",
 ]
 
 MIDDLEWARE = [

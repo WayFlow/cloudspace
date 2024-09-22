@@ -2,7 +2,7 @@ import uuid
 
 from django.contrib.auth import get_user_model
 from django.db import models
-from utils.crypto import generate_secret_key
+from utils.crypto import generate_secret_key, generate_crc32_hash
 
 User = get_user_model()
 
@@ -15,9 +15,15 @@ class Company(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     email = models.EmailField(null=True, blank=True)
+    route = models.CharField(max_length=8, editable=False, blank=True)
 
     def __str__(self) -> str:
         return self.company_name
+    
+    def save(self, *args, **kwargs):
+        if not self.route and self.id:
+            self.route = generate_crc32_hash(str(self.id))
+        super(Company, self).save(*args, **kwargs)
 
 
 class Project(models.Model):
@@ -37,6 +43,7 @@ class Project(models.Model):
 class Environment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     env = models.CharField(max_length=30)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='get_project_envs', null=True)
 
 
 class DBSchema(models.Model):
