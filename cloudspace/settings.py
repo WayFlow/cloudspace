@@ -1,5 +1,7 @@
 from datetime import timedelta
 from pathlib import Path
+from neomodel import config
+from neo.config import initialize_neo4j_config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -60,6 +62,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "cloudspace.wsgi.application"
 
+
+initialize_neo4j_config(config)
 
 DATABASES = {
     "default": {

@@ -8,3 +8,4 @@ PyJWT
 djangorestframework
 django-cors-headers
 neo4j
+neomodel
