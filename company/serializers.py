@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer
-from .models import Company, Project, Environment
+from .models import Company, Project, Environment, API
 
 
 class CompanySerializer(ModelSerializer):
@@ -27,3 +27,17 @@ class EnvironmentSerializer(ModelSerializer):
     class Meta:
         model = Environment
         fields = "__all__"
+
+
+class APISerializer(ModelSerializer):
+
+    class Meta:
+        model = API
+        fields = "__all__"
+
+    # TODO: Is there need of deserialization of project field
+
+    def to_representation(self, instance : API):
+        repr = super().to_representation(instance)
+        repr["endpoint"] = f"/c/{instance.project.company.route}/{instance.endpoint}"
+        return repr

@@ -14,7 +14,7 @@ CORS_ALLOW_HEADERS = ["*"]
 CORS_ALLOWED_ORIGINS = ["http://localhost:8801"]
 
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["localhost"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",

@@ -7,10 +7,11 @@ from .serializers import (
     CompanySerializer,
     ProjectSerializer,
     EnvironmentSerializer,
+    APISerializer
 )
 from rest_framework.response import Response
 from rest_framework.status import *
-from .models import Company, Project
+from .models import Company, Project, API
 
 from utils.constants import ResponseDataKey
 
@@ -103,3 +104,15 @@ class CreateEnvironmentView(APIView):
             return Response(
                 {ResponseDataKey.ERROR_KEY: str(e)}, status=HTTP_400_BAD_REQUEST
             )
+
+
+class ListAPIProjectView(ListCreateAPIView):
+
+    serializer_class = APISerializer
+
+    def get_queryset(self):
+        id = self.kwargs.get("id", None)
+        queryset = API.objects.filter(project__id=id, project__company__created_by=self.request.user.id)
+        return queryset
+    
+        
