@@ -1,5 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 from .models import Company, Project, Environment, API
+from core.router import AbstractAPIRegistrationHandler
 
 
 class CompanySerializer(ModelSerializer):
@@ -35,6 +36,12 @@ class APISerializer(ModelSerializer):
         model = API
         fields = "__all__"
         read_only_fields = ["flow"]
+
+    def create(self, validated_data):
+        instance : API = super().create(validated_data)
+        AbstractAPIRegistrationHandler.register(instance)
+        return instance
+
 
     def to_representation(self, instance : API):
         repr = super().to_representation(instance)

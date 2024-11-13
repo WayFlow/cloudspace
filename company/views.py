@@ -11,7 +11,7 @@ from .serializers import (
 )
 from rest_framework.response import Response
 from rest_framework.status import *
-from .models import Company, Project, API
+from .models import Company, Project, API, Environment
 
 from utils.constants import ResponseDataKey
 
@@ -87,23 +87,29 @@ class ProjectView(ListCreateAPIView):
             )
 
 
-class CreateEnvironmentView(APIView):
+class EnvironmentView(APIView):
+
+    def get(self, request, *args, **kwargs):
+        queryset = Environment.objects.filter(company__created_by=request.user)
+        serializer = EnvironmentSerializer(queryset, many=True)
+        return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
-        try:
-            data = request.data
-            serializer = EnvironmentSerializer(data=data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=HTTP_201_CREATED)
-            return Response(
-                {ResponseDataKey.ERROR_KEY: build_error_message(serializer.errors)},
-                status=HTTP_400_BAD_REQUEST,
-            )
-        except Exception as e:
-            return Response(
-                {ResponseDataKey.ERROR_KEY: str(e)}, status=HTTP_400_BAD_REQUEST
-            )
+        # try:
+        #     data = request.data
+        #     serializer = EnvironmentSerializer(data=data)
+        #     if serializer.is_valid():
+        #         serializer.save()
+        #         return Response(serializer.data, status=HTTP_201_CREATED)
+        #     return Response(
+        #         {ResponseDataKey.ERROR_KEY: build_error_message(serializer.errors)},
+        #         status=HTTP_400_BAD_REQUEST,
+        #     )
+        # except Exception as e:
+        #     return Response(
+        #         {ResponseDataKey.ERROR_KEY: str(e)}, status=HTTP_400_BAD_REQUEST
+        #     )
+        return Response({"message": "Not allowed to create"}, status=HTTP_400_BAD_REQUEST)
 
 
 class ListAPIProjectView(ListCreateAPIView):

@@ -43,9 +43,9 @@ class Project(models.Model):
 class Environment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     env = models.CharField(max_length=30)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='get_project_envs', null=True)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="get_company_envs")
 
-
+# TODO: what is the use of this Table ?
 class DBSchema(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     db_name = models.CharField(max_length=255)

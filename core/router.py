@@ -80,28 +80,37 @@ class APIFlowBuilder(AbstractAPIRegistrationHandler):
         authentication method to be implemented for the apis
         '''
         return AllowAny
-
-    @api_view(["GET"])
-    @permission_classes([AllowAny])
-    def _get(self, request, **kwargs):
-        return self._build_api_body(self.api.flow, request, **kwargs)
-
-
-    @api_view(["post"])
-    @permission_classes([AllowAny])
-    def _post(self, request, **kwargs):
-        return self._build_api_body(self.api.flow, request, **kwargs)
+    
+    def _get(self):
+        @api_view(["GET"])
+        @permission_classes([AllowAny])
+        def handler(request, **kwargs):
+            print(request)
+            return self._build_api_body(self.api.flow, request, **kwargs)
+        return handler
 
     
-    @api_view(["put"])
-    @permission_classes([AllowAny])
-    def _put(self, request, **kwargs):
-        return self._build_api_body(self.api.flow, request, **kwargs)
+    def _post(self):
+        @api_view(["POST"])
+        @permission_classes([AllowAny])
+        def handler(request, **kwargs):
+            return self._build_api_body(self.api.flow, request, **kwargs)
+        return handler
 
-    @api_view(["delete"])
-    @permission_classes([AllowAny])
-    def _delete(self, request, **kwargs):
-        return self._build_api_body(self.api.flow, request, **kwargs)
+    def _put(self):   
+        @api_view(["PUT"])
+        @permission_classes([AllowAny])
+        def handler(request, **kwargs):
+            return self._build_api_body(self.api.flow, request, **kwargs)
+        return handler
+
+
+    def _delete(self):
+        @api_view(["DELETE"])
+        @permission_classes([AllowAny])
+        def handler(request, **kwargs):
+            return self._build_api_body(self.api.flow, request, **kwargs)
+        return handler
 
 
     def _handle_api_method(self):
@@ -117,7 +126,7 @@ class APIFlowBuilder(AbstractAPIRegistrationHandler):
     @property
     def handler_class(self):
         view = self._handle_api_method()
-        return view
+        return view()
 
 
 class LoadAPIBodyFromNeo(AbstractAPIRegistrationHandler):
