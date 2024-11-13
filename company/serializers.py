@@ -34,8 +34,7 @@ class APISerializer(ModelSerializer):
     class Meta:
         model = API
         fields = "__all__"
-
-    # TODO: Is there need of deserialization of project field
+        read_only_fields = ["flow"]
 
     def to_representation(self, instance : API):
         repr = super().to_representation(instance)
