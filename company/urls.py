@@ -4,6 +4,7 @@ from .views import (
     CompanyListAPIView,
     ProjectView,
     ListAPIProjectView,
+    EnvironmentView
 )
 
 urlpatterns = [
@@ -20,7 +21,7 @@ urlpatterns = [
     ),
     # projects
     path(
-        "projects",
+        "projects/<str:id>",
         ProjectView.as_view(),
         name="create project",
     ),
@@ -30,4 +31,9 @@ urlpatterns = [
         ListAPIProjectView.as_view(),
         name="List all API's of a project",
     ),
+    path(
+        "envs/<str:id>",
+        EnvironmentView.as_view(),
+        name="List all envs of a company",
+    )
 ]

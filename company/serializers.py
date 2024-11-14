@@ -9,6 +9,12 @@ class CompanySerializer(ModelSerializer):
         model = Company
         fields = "__all__"
 
+    def create(self, validated_data):
+        company: Company = super().create(validated_data)
+        env = Environment(env="staging", company=company)
+        env.save()
+        return company
+
 
 class ProjectSerializer(ModelSerializer):
     # TODO: handle project secret_key visibility

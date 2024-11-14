@@ -15,7 +15,11 @@ from .models import Company, Project, API, Environment
 
 from utils.constants import ResponseDataKey
 
-
+'''
+TODO: for now I am fetching projects and env based on the 
+created_by user use company_id to filter out the projects
+env and DBSecrets
+'''
 class CompanyListAPIView(ListAPIView):
     serializer_class = CompanySerializer
 
@@ -67,11 +71,12 @@ class ProjectView(ListCreateAPIView):
     serializer_class = ProjectSerializer
 
     def get_queryset(self):
-        queryset = Project.objects.filter(company__created_by=self.request.user)
+        queryset = Project.objects.filter(company__created_by=self.request.user, company=self.kwargs.get('id'))
         return queryset
 
-    def create(self, request, *args, **kwargs):
+    def create(self, request, id, *args, **kwargs):
         try:
+            print(id)
             data = request.data
             serializer = ProjectSerializer(data=data)
             if serializer.is_valid():
@@ -89,8 +94,8 @@ class ProjectView(ListCreateAPIView):
 
 class EnvironmentView(APIView):
 
-    def get(self, request, *args, **kwargs):
-        queryset = Environment.objects.filter(company__created_by=request.user)
+    def get(self, request, id,*args, **kwargs):
+        queryset = Environment.objects.filter(company__created_by=request.user, company=id)
         serializer = EnvironmentSerializer(queryset, many=True)
         return Response(serializer.data)
 
