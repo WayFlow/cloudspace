@@ -3,7 +3,7 @@ from .views import (
     CreateCompanyView,
     CompanyListAPIView,
     ProjectView,
-    ListAPIProjectView,
+    ListProjectAPIsView,
     EnvironmentView
 )
 
@@ -28,7 +28,7 @@ urlpatterns = [
     # api
     path(
         "apis/<str:id>",
-        ListAPIProjectView.as_view(),
+        ListProjectAPIsView.as_view(),
         name="List all API's of a project",
     ),
     path(

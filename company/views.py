@@ -117,7 +117,7 @@ class EnvironmentView(APIView):
         return Response({"message": "Not allowed to create"}, status=HTTP_400_BAD_REQUEST)
 
 
-class ListAPIProjectView(ListCreateAPIView):
+class ListProjectAPIsView(ListCreateAPIView):
 
     serializer_class = APISerializer
 

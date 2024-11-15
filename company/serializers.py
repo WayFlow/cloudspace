@@ -8,10 +8,13 @@ class CompanySerializer(ModelSerializer):
     class Meta:
         model = Company
         fields = "__all__"
+        read_only_fields = ["route"]
 
     def create(self, validated_data):
         company: Company = super().create(validated_data)
         env = Environment(env="staging", company=company)
+        env.save()
+        env = Environment(env="prod", company=company)
         env.save()
         return company
 
@@ -21,7 +24,9 @@ class ProjectSerializer(ModelSerializer):
 
     class Meta:
         model = Project
-        fields = "__all__"
+        exclude = ["secret_key"]
+        read_only_fields = ["secret_key", "log_retention"]
+
 
     def to_representation(self, instance: Project):
         repr = super().to_representation(instance)

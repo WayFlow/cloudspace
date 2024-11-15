@@ -124,3 +124,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 AUTH_USER_MODEL = "account.Account"
+
+# SERVER CONFIGURATION CONSTANTS
+MAX_THREAD_WORKERS = 10

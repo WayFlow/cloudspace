@@ -1,3 +1,5 @@
+import uuid
+
 from typing import List
 
 from rest_framework.permissions import AllowAny
@@ -9,6 +11,7 @@ from rest_framework.status import *
 
 from company.models import *
 from core.urls import urlpatterns
+from core.loggers import Logger
 
 
 '''
@@ -56,9 +59,6 @@ class CreateAPIEnpoint(AbstractAPIRegistrationHandler):
 
     @classmethod
     def next(cls, api: API):
-        '''
-        TODO: handle path params in handler functions
-        '''
         endpoint_prefix = api.project.company.route
         endpoint_path = api.endpoint
         name = api.name
@@ -74,6 +74,8 @@ class APIFlowBuilder(AbstractAPIRegistrationHandler):
         super().__init__()
         self.api = api
 
+    
+
     def _authentication(self):
         '''
         TODO: for now all apis are not authenticated need to a 
@@ -85,8 +87,7 @@ class APIFlowBuilder(AbstractAPIRegistrationHandler):
         @api_view(["GET"])
         @permission_classes([AllowAny])
         def handler(request, **kwargs):
-            print(request)
-            return self._build_api_body(self.api.flow, request, **kwargs)
+            return self._build_api_body(request, **kwargs)
         return handler
 
     
@@ -94,14 +95,14 @@ class APIFlowBuilder(AbstractAPIRegistrationHandler):
         @api_view(["POST"])
         @permission_classes([AllowAny])
         def handler(request, **kwargs):
-            return self._build_api_body(self.api.flow, request, **kwargs)
+            return self._build_api_body(request, **kwargs)
         return handler
 
     def _put(self):   
         @api_view(["PUT"])
         @permission_classes([AllowAny])
         def handler(request, **kwargs):
-            return self._build_api_body(self.api.flow, request, **kwargs)
+            return self._build_api_body(request, **kwargs)
         return handler
 
 
@@ -109,7 +110,7 @@ class APIFlowBuilder(AbstractAPIRegistrationHandler):
         @api_view(["DELETE"])
         @permission_classes([AllowAny])
         def handler(request, **kwargs):
-            return self._build_api_body(self.api.flow, request, **kwargs)
+            return self._build_api_body(request, **kwargs)
         return handler
 
 
@@ -120,8 +121,8 @@ class APIFlowBuilder(AbstractAPIRegistrationHandler):
 
 
 
-    def _build_api_body(self, flow_id, request, **kwargs):
-        return LoadAPIBodyFromNeo(flow_id).build(request, **kwargs)
+    def _build_api_body(self, request, **kwargs):
+        return LoadAPIBodyFromNeo(self.api).build(request, **kwargs)
 
     @property
     def handler_class(self):
@@ -131,10 +132,36 @@ class APIFlowBuilder(AbstractAPIRegistrationHandler):
 
 class LoadAPIBodyFromNeo(AbstractAPIRegistrationHandler):
 
-    def __init__(self, flow_id: str):
+    def __init__(self, api: API):
         super().__init__()
-        self.flow_id = flow_id
+        self.api = api
 
+    # TODO: make decorator with this so that we can directly apply to build function
+    def _log_api_call(self, request, status_code, **kwargs):
+        if status_code >= 100 and status_code < 400:
+            Logger.info(self.api.project, f"{self.api.method} {request.path} {status_code}")
+        elif status_code == 404:
+            Logger.warn(self.api.project, f"{self.api.method} {request.path} 404")
+        else:
+            Logger.error(self.api.project, f"{self.api.method} {request.path} {status_code}")
 
+    def _check_requester_authenticity(self, request) -> {bool, str}:
+        try:
+            envId = request.headers.get('Env-Id')
+            projectId = request.headers.get('Project-Id')
+            if envId is None or projectId is None:
+                return False, "missing Env-Id or Project-Id in headers"
+            if self.api.project.id != uuid.UUID(projectId):
+                return False, "api is not associated with the provided projectId"
+            return True, ""
+        except:
+            return False, "Invalid Project-Id or Env-Id in headers"
+    
+    # find a better way to do it
     def build(self, request, **kwargs):
+        authentic, message = self._check_requester_authenticity(request)
+        if not authentic:
+            self._log_api_call(request, HTTP_403_FORBIDDEN)
+            return Response(message, status=HTTP_403_FORBIDDEN)
+        self._log_api_call(request, HTTP_204_NO_CONTENT)
         return Response(status=HTTP_204_NO_CONTENT)

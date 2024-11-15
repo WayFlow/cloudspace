@@ -35,6 +35,7 @@ class Project(models.Model):
     company = models.ForeignKey(
         Company, on_delete=models.CASCADE, related_name="get_company_projects"
     )
+    log_retention = models.PositiveIntegerField(default=7)
 
     def __str__(self) -> str:
         return self.project_name
@@ -93,3 +94,20 @@ class API(models.Model):
     authenticated = models.BooleanField(default=False)
     flow = models.CharField(max_length=120, null=True, blank=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='get_project_apis')
+
+
+class ProjectLog(models.Model):
+
+    class Level(models.TextChoices):
+        INFO="INFO"
+        ERROR="ERROR"
+        WARN="WARN"
+
+    class Meta:
+        ordering = ('-created_at',)
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    log = models.TextField()
+    level= models.CharField(choices=Level.choices, max_length=30, default=Level.INFO)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="get_project_logs")
