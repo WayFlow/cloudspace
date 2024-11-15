@@ -4,6 +4,12 @@ from rest_framework.authentication import BaseAuthentication
 import jwt
 from .token import TokenService
 import json
+import re
+
+from channels.middleware import BaseMiddleware
+from django.contrib.auth.models import AnonymousUser
+from channels.db import database_sync_to_async
+from jwt import ExpiredSignatureError, DecodeError
 
 Account = get_user_model()
 
@@ -24,6 +30,7 @@ class JWTAuthentication(BaseAuthentication):
     """
 
     def authenticate(self, request):
+        print(request.headers.get("Cookie"))
         data = request.COOKIES.get("cred")
         if not data:
             return None
@@ -42,3 +49,37 @@ class JWTAuthentication(BaseAuthentication):
             raise exceptions.AuthenticationFailed("Token signature is invalid.")
         except Exception as e:
             raise exceptions.AuthenticationFailed(str(e))
+
+
+
+class WebSocketJWTAuthMiddleware(BaseMiddleware):
+    def __init__(self, inner):
+        super().__init__(inner)
+
+    async def __call__(self, scope, receive, send):
+        headers = dict(scope.get("headers", []))
+        token = headers.get(b"authorization", b"").decode()
+        try:
+            if token:
+                access_token = TokenService.verify_access(token)
+                user = await get_account(access_token.user_id)
+                if user:
+                    scope["user"] = user
+                else:
+                    scope["user"] = AnonymousUser()
+            else:
+                scope["user"] = AnonymousUser()
+        except (ExpiredSignatureError, DecodeError) as e:
+            scope["user"] = AnonymousUser()
+        except Exception as e:
+            scope["user"] = AnonymousUser()
+
+        return await super().__call__(scope, receive, send)
+
+
+@database_sync_to_async
+def get_account(user_id):
+    try:
+        return Account.objects.get(id=user_id)
+    except Account.DoesNotExist:
+        return None

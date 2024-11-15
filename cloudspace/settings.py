@@ -14,9 +14,10 @@ CORS_ALLOW_HEADERS = ["*"]
 CORS_ALLOWED_ORIGINS = ["http://localhost:8801"]
 
 
-ALLOWED_HOSTS = ["localhost"]
+ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -60,7 +61,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "cloudspace.wsgi.application"
+# WSGI_APPLICATION = "cloudspace.wsgi.application"
+ASGI_APPLICATION = "cloudspace.asgi.application"
 
 
 initialize_neo4j_config(config)
@@ -84,6 +86,15 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
     }
+}
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("172.16.1.11", 6379)],
+        },
+    },
 }
 
 
