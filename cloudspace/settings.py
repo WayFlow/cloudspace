@@ -90,7 +90,7 @@ CACHES = {
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "BACKEND": "core.channel_layer.CustomChannelLayer",
         "CONFIG": {
             "hosts": [("172.16.1.11", 6379)],
         },

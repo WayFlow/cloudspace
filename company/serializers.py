@@ -58,3 +58,6 @@ class APISerializer(ModelSerializer):
         repr = super().to_representation(instance)
         repr["endpoint"] = f"/c/{instance.project.company.route}/{instance.endpoint}"
         return repr
+    
+
+

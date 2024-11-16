@@ -110,4 +110,5 @@ class ProjectLog(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     log = models.TextField()
     level= models.CharField(choices=Level.choices, max_length=30, default=Level.INFO)
+    env = models.ForeignKey(Environment, on_delete=models.CASCADE, related_name="get_env_logs", null=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="get_project_logs")

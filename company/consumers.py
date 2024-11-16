@@ -1,22 +1,20 @@
-import json
+from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
-from channels.generic.websocket import WebsocketConsumer
+class CompanyProjectLoggerConsumer(AsyncJsonWebsocketConsumer):
 
+    async def connect(self):
+        if not self.scope.get("projectId") or not self.scope.get("envId"):
+            return await self.close(403)
+        if not self.scope["user"].is_authenticated:
+            return await self.close(401)
+        project_log_group = f"{self.scope['projectId']}_{self.scope['envId']}_logs"
+        print(project_log_group)
+        await self.channel_layer.group_add(project_log_group, self.channel_name)
+        await self.accept()
+        await self.send_json(
+            "Started Listening..."
+        )
 
-class TestConsumer(WebsocketConsumer):
-    def connect(self):
-        print(self.scope["user"])
-        if self.scope["user"].is_authenticated:
-            self.accept()
-        else:
-            self.close(403)
-
-    def disconnect(self, close_code):
-        pass
-
-    def receive(self, text_data):
-        self.send(text_data)
-        # text_data_json = json.loads(text_data)
-        # message = text_data_json["message"]
-
+    async def log(self, content):
+        await self.send_json(content["message"])
         

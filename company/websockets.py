@@ -3,5 +3,5 @@ from django.urls import path
 from . import consumers
 
 websocket_urlpatterns = [
-    path("ws", consumers.TestConsumer.as_asgi()),
+   path("project/log-trail", consumers.CompanyProjectLoggerConsumer.as_asgi())
 ]

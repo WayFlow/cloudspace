@@ -30,7 +30,6 @@ class JWTAuthentication(BaseAuthentication):
     """
 
     def authenticate(self, request):
-        print(request.headers.get("Cookie"))
         data = request.COOKIES.get("cred")
         if not data:
             return None
@@ -60,6 +59,10 @@ class WebSocketJWTAuthMiddleware(BaseMiddleware):
         headers = dict(scope.get("headers", []))
         token = headers.get(b"authorization", b"").decode()
         try:
+            projectId = headers.get(b"project-id", b"").decode()
+            envId = headers.get(b"env-id", b"").decode()
+            scope["envId"] = envId
+            scope["projectId"] = projectId
             if token:
                 access_token = TokenService.verify_access(token)
                 user = await get_account(access_token.user_id)

@@ -139,11 +139,11 @@ class LoadAPIBodyFromNeo(AbstractAPIRegistrationHandler):
     # TODO: make decorator with this so that we can directly apply to build function
     def _log_api_call(self, request, status_code, **kwargs):
         if status_code >= 100 and status_code < 400:
-            Logger.info(self.api.project, f"{self.api.method} {request.path} {status_code}")
+            Logger.log(self.api.project, f"{self.api.method} '{request.path}' {status_code}", env=request.headers.get("Env-Id"), level=ProjectLog.Level.INFO)
         elif status_code == 404:
-            Logger.warn(self.api.project, f"{self.api.method} {request.path} 404")
+            Logger.log(self.api.project, f"{self.api.method} '{request.path}' 404", env=request.headers.get("Env-Id"), level=ProjectLog.Level.WARN)
         else:
-            Logger.error(self.api.project, f"{self.api.method} {request.path} {status_code}")
+            Logger.log(self.api.project, f"{self.api.method} '{request.path}' {status_code}", env=request.headers.get("Env-Id"), level=ProjectLog.Level.ERROR)
 
     def _check_requester_authenticity(self, request) -> {bool, str}:
         try:
@@ -153,6 +153,9 @@ class LoadAPIBodyFromNeo(AbstractAPIRegistrationHandler):
                 return False, "missing Env-Id or Project-Id in headers"
             if self.api.project.id != uuid.UUID(projectId):
                 return False, "api is not associated with the provided projectId"
+            env = Environment.objects.filter(id=envId, company=self.api.project.company).first()
+            if not env:
+                return False, "envId is not associated with projectId"
             return True, ""
         except:
             return False, "Invalid Project-Id or Env-Id in headers"
