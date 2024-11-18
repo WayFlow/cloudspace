@@ -8,7 +8,6 @@ class CompanyProjectLoggerConsumer(AsyncJsonWebsocketConsumer):
         if not self.scope["user"].is_authenticated:
             return await self.close(401)
         project_log_group = f"{self.scope['projectId']}_{self.scope['envId']}_logs"
-        print(project_log_group)
         await self.channel_layer.group_add(project_log_group, self.channel_name)
         await self.accept()
         await self.send_json(

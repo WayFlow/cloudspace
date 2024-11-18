@@ -7,11 +7,12 @@ from .serializers import (
     CompanySerializer,
     ProjectSerializer,
     EnvironmentSerializer,
-    APISerializer
+    APISerializer,
+    ProjectLoggerSerializer
 )
 from rest_framework.response import Response
 from rest_framework.status import *
-from .models import Company, Project, API, Environment
+from .models import Company, Project, API, Environment, ProjectLog
 
 from utils.constants import ResponseDataKey
 
@@ -126,4 +127,11 @@ class ListProjectAPIsView(ListCreateAPIView):
         queryset = API.objects.filter(project__id=id, project__company__created_by=self.request.user.id)
         return queryset
     
-        
+
+
+class ProjectLogsAPIView(ListAPIView):
+
+    serializer_class = ProjectLoggerSerializer
+
+    def get_queryset(self):
+        return ProjectLog.objects.filter(company=self.kwargs.get('id'), company__created_by=self.request.user)

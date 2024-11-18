@@ -1,6 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 from .models import Company, Project, Environment, API
-from core.router import AbstractAPIRegistrationHandler
+from core.serializers import ProjectLoggerSerializer
+from core.router import AbstractAPIRegistrationHandler 
 
 
 class CompanySerializer(ModelSerializer):
@@ -58,6 +59,3 @@ class APISerializer(ModelSerializer):
         repr = super().to_representation(instance)
         repr["endpoint"] = f"/c/{instance.project.company.route}/{instance.endpoint}"
         return repr
-    
-
-

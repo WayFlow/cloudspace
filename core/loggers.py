@@ -73,4 +73,4 @@ class Logger:
 
     @classmethod
     def build_log(cls, project_log: ProjectLog) -> str:
-        return f"{project_log.level}: [{project_log.created_at}]:{project_log.log}"
+        return ProjectLoggerSerializer(project_log).data
