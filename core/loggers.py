@@ -19,7 +19,7 @@ class Logger:
                 project_log_group,
                 {
                     "type": "log",
-                    "message": cls.build_log(project_log)
+                    "log": cls.build_log(project_log)
                 }
             )
 
@@ -73,4 +73,5 @@ class Logger:
 
     @classmethod
     def build_log(cls, project_log: ProjectLog) -> str:
-        return ProjectLoggerSerializer(project_log).data
+        data = ProjectLoggerSerializer(project_log).data
+        return data

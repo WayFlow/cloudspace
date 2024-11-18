@@ -2,6 +2,8 @@ from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView
 
+from django.db.models import Q
+
 from utils.errors import build_error_message
 from .serializers import (
     CompanySerializer,
@@ -13,6 +15,7 @@ from .serializers import (
 from rest_framework.response import Response
 from rest_framework.status import *
 from .models import Company, Project, API, Environment, ProjectLog
+from .paginator import CustomCursorPagination
 
 from utils.constants import ResponseDataKey
 
@@ -132,6 +135,15 @@ class ListProjectAPIsView(ListCreateAPIView):
 class ProjectLogsAPIView(ListAPIView):
 
     serializer_class = ProjectLoggerSerializer
+    pagination_class = CustomCursorPagination
 
     def get_queryset(self):
-        return ProjectLog.objects.filter(company=self.kwargs.get('id'), company__created_by=self.request.user)
+        env_id = self.request.query_params.get("envId")
+        start_from = self.request.query_params.get("from")
+        to = self.request.query_params.get("to")
+        search_params = self.request.query_params.get("q")
+        filters = {}
+        
+        if env_id is None:
+            return []
+        return ProjectLog.objects.filter(project=self.kwargs.get('id'), env=env_id, project__company__created_by=self.request.user)

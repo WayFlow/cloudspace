@@ -4,7 +4,8 @@ from .views import (
     CompanyListAPIView,
     ProjectView,
     ListProjectAPIsView,
-    EnvironmentView
+    EnvironmentView,
+    ProjectLogsAPIView
 )
 
 urlpatterns = [
@@ -35,5 +36,11 @@ urlpatterns = [
         "envs/<str:id>",
         EnvironmentView.as_view(),
         name="List all envs of a company",
+    ),
+    path(
+        "projects/<str:id>/logs",
+        ProjectLogsAPIView.as_view(),
+        name="List paginated api logs of a project",
     )
+
 ]

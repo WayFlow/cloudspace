@@ -15,5 +15,5 @@ class CompanyProjectLoggerConsumer(AsyncJsonWebsocketConsumer):
         )
 
     async def log(self, content):
-        await self.send_json(content["message"])
+        await self.send_json(content["log"])
         

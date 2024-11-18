@@ -103,6 +103,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
 }
 
+PAGINATION_PAGE_SIZE = 10
+CURSOR_QUERY_PARAM_NAME = "page"
 
 AUTH_PASSWORD_VALIDATORS = [
     {
