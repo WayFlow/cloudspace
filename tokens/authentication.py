@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from urllib.parse import parse_qs
 from rest_framework import exceptions
 from rest_framework.authentication import BaseAuthentication
 import jwt
@@ -56,27 +57,29 @@ class WebSocketJWTAuthMiddleware(BaseMiddleware):
         super().__init__(inner)
 
     async def __call__(self, scope, receive, send):
-        headers = dict(scope.get("headers", []))
-        token = headers.get(b"authorization", b"").decode()
         try:
-            projectId = headers.get(b"project-id", b"").decode()
-            envId = headers.get(b"env-id", b"").decode()
-            scope["envId"] = envId
-            scope["projectId"] = projectId
+            query_params = parse_qs(scope.get('query_string', b'').decode())
+            token = query_params.get('token', [None])[0]
+            envId = query_params.get('envId', [None])[0]
+            projectId = query_params.get('projectId', [None])[0]
+            scope['envId'] = envId
+            scope['projectId'] = projectId
             if token:
-                access_token = TokenService.verify_access(token)
-                user = await get_account(access_token.user_id)
-                if user:
-                    scope["user"] = user
-                else:
-                    scope["user"] = AnonymousUser()
+                try:
+                    access_token = TokenService.verify_access(token)
+                    user = await get_account(access_token.user_id)
+                    scope['user'] = user if user else AnonymousUser()
+                except (ExpiredSignatureError, DecodeError):
+                    scope['user'] = AnonymousUser()
+                except Exception as e:
+                    print(f"Unexpected error during token verification: {e}")
+                    scope['user'] = AnonymousUser()
             else:
-                scope["user"] = AnonymousUser()
-        except (ExpiredSignatureError, DecodeError) as e:
-            scope["user"] = AnonymousUser()
-        except Exception as e:
-            scope["user"] = AnonymousUser()
+                scope['user'] = AnonymousUser()
 
+        except Exception as e:
+            print(f"Error in WebSocketJWTAuthMiddleware: {e}")
+            scope['user'] = AnonymousUser()
         return await super().__call__(scope, receive, send)
 
 
