@@ -5,7 +5,8 @@ from .views import (
     ProjectView,
     ListProjectAPIsView,
     EnvironmentView,
-    ProjectLogsAPIView
+    ProjectLogsAPIView,
+    DBSecretView
 )
 
 urlpatterns = [
@@ -22,25 +23,30 @@ urlpatterns = [
     ),
     # projects
     path(
-        "projects/<str:id>",
+        "cmp/<str:id>/projects",
         ProjectView.as_view(),
-        name="create project",
-    ),
-    # api
-    path(
-        "apis/<str:id>",
-        ListProjectAPIsView.as_view(),
-        name="List all API's of a project",
+        name="create project or get projects",
     ),
     path(
-        "envs/<str:id>",
+        "cmp/<str:id>/envs",
         EnvironmentView.as_view(),
         name="List all envs of a company",
     ),
+    # api
     path(
-        "projects/<str:id>/logs",
+        "project/<str:id>/apis",
+        ListProjectAPIsView.as_view(),
+        name="List all API's of a project create",
+    ),
+    path(
+        "project/<str:id>/logs",
         ProjectLogsAPIView.as_view(),
         name="List paginated api logs of a project",
+    ),
+    path(
+        "project/<str:id>/secrets",
+        DBSecretView.as_view(),
+        name="List and create secrets of a project",
     )
 
 ]

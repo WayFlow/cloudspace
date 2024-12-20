@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer
-from .models import Company, Project, Environment, API
+from .models import Company, Project, Environment, API, DBSecret
 from core.serializers import ProjectLoggerSerializer
 from core.router import AbstractAPIRegistrationHandler 
 
@@ -59,3 +59,10 @@ class APISerializer(ModelSerializer):
         repr = super().to_representation(instance)
         repr["endpoint"] = f"/c/{instance.project.company.route}/{instance.endpoint}"
         return repr
+    
+
+class DBSecretsSerializer(ModelSerializer):
+
+    class Meta:
+        model = DBSecret
+        fields = "__all__"

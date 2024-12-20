@@ -68,14 +68,14 @@ class DBSecret(models.Model):
     cluster_name = models.CharField(max_length=120)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    company = models.ForeignKey(
-        Company, on_delete=models.CASCADE, related_name="get_db_secret"
+    project = models.ForeignKey(
+        Project, on_delete=models.CASCADE, related_name="get_db_secret"
     )
     env = models.ForeignKey(
         Environment, on_delete=models.CASCADE, related_name="get_env_secrets"
     )
 
-
+# Give functionality to group apis.
 class API(models.Model):
 
     class RequestMethod(models.TextChoices):

@@ -10,11 +10,12 @@ from .serializers import (
     ProjectSerializer,
     EnvironmentSerializer,
     APISerializer,
-    ProjectLoggerSerializer
+    ProjectLoggerSerializer,
+    DBSecretsSerializer
 )
 from rest_framework.response import Response
 from rest_framework.status import *
-from .models import Company, Project, API, Environment, ProjectLog
+from .models import Company, Project, API, Environment, ProjectLog, DBSecret
 from .paginator import CustomCursorPagination
 
 from utils.constants import ResponseDataKey
@@ -137,13 +138,26 @@ class ProjectLogsAPIView(ListAPIView):
     serializer_class = ProjectLoggerSerializer
     pagination_class = CustomCursorPagination
 
+    '''
+    TODO: implement filtering based on query start date and end date
+    also implement text based search 
+    docs: https://docs.djangoproject.com/en/5.1/ref/contrib/postgres/search/
+    ''' 
     def get_queryset(self):
         env_id = self.request.query_params.get("envId")
-        start_from = self.request.query_params.get("from")
-        to = self.request.query_params.get("to")
-        search_params = self.request.query_params.get("q")
-        filters = {}
-        
         if env_id is None:
             return []
+        # TODO: filter env logs from the query params later
+        # start_from = self.request.query_params.get("from")
+        # to = self.request.query_params.get("to")
+        # search_params = self.request.query_params.get("q")
+        # filters = Q()
         return ProjectLog.objects.filter(project=self.kwargs.get('id'), env=env_id, project__company__created_by=self.request.user)
+    
+
+class DBSecretView(ListCreateAPIView):
+    serializer_class = DBSecretsSerializer
+
+
+    def get_queryset(self):
+        return DBSecret.objects.filter(project__company__created_by=self.request.user)
