@@ -160,4 +160,6 @@ class DBSecretView(ListCreateAPIView):
 
 
     def get_queryset(self):
-        return DBSecret.objects.filter(project__company__created_by=self.request.user)
+        env_id = self.request.query_params.get("envId")
+        project_id = self.kwargs.get('id')
+        return DBSecret.objects.filter(project__company__created_by=self.request.user, env=env_id, project=project_id)
